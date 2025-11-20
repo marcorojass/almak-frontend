@@ -9,6 +9,7 @@ import CategoriaProducto from "../views/admin/categoria-productos/CategoriaProdu
 import SitioLayout from "../views/SitioLayout.vue";
 import Login from "../views/auth/login/Login.vue";
 import Producto from "../views/admin/productos/Producto.vue";
+import Raza from "../views/admin/razas/raza.vue";
 
 
 const routes=[
@@ -50,11 +51,13 @@ const routes=[
             {
                 path:"productos",
                 component:Producto
+            },
+            {
+                path:"razas",
+                component:Raza
             }
-            
         ]
     }
-   
 ]
 
 const router =createRouter({

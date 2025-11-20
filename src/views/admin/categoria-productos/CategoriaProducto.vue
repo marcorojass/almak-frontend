@@ -21,7 +21,7 @@
               class="btn btn-warning btn-sm me-2"
               @click="editar(categoria.categoriaProductoId)"
             >
-             <i class="bi bi-pencil"></i>
+              <i class="bi bi-pencil"></i>
 
  Editar
             </button>
