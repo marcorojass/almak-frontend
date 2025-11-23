@@ -1,17 +1,17 @@
 <template>
   <div class="container mt-4">
-    <h2 class="mb-3 text-success">Listado de Razas</h2>
-    { raza }
-    <form>
-      <label for="">nombre</label>
-      <input v-model="raza.nombreRaza">
-      <br>
-      <label for="">descripcion</label>
-      <input v-model="raza.descripcion">
-      <br>
-      <button type="button" @click="crearRazas()">crear</button>
-    </form>
-    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-success mb-0">Listado de Razas</h2>
+      
+      <!-- CORREGIDO: clase btn-primary → btn-success + ruta correcta -->
+      <RouterLink class="btn btn-success d-flex align-items-center gap-2" to="/admin/razas/crear">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+          <path d="M228.7 108.7l-48 48a8 8 0 0 1-11.4-11.4L204.7 120H32a8 8 0 0 1 0-16h172.7l-35.4-35.3a8 8 0 0 1 11.4-11.4l48 48a8 8 0 0 1 0 11.4Z"></path>
+        </svg>
+        Crear Nueva Raza
+      </RouterLink>
+    </div>
+
     <table class="table table-striped table-bordered shadow-sm">
       <thead class="table-success">
         <tr>
@@ -22,33 +22,30 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="x in razas" :key="x.razaId">
-          <td>{{ x.razaId }}</td>
-          <td>{{ x.nombreRaza }}</td>
-          <td>{{ x.descripcion }}</td>
+        <tr v-for="raza in razas" :key="raza.razaId">
+          <td>{{ raza.razaId }}</td>
+          <td>{{ raza.nombreRaza }}</td>
+          <td>{{ raza.descripcion || '-' }}</td>
           <td>
-            <button
+            <!-- CORREGIDO: /admin/raza → /admin/razas -->
+            <RouterLink
               class="btn btn-warning btn-sm me-2"
-              
+              :to="`/admin/razas/editar/${raza.razaId}`"
             >
-              <i class="bi bi-pencil"></i>
-
- Editar
-            </button>
+              <i class="bi bi-pencil"></i> Editar
+            </RouterLink>
             <button
               class="btn btn-danger btn-sm"
-              
+              @click="eliminarRaza(raza.razaId)"
             >
-            <i class="bi bi-trash"></i>
-              Eliminar
+              <i class="bi bi-trash"></i> Eliminar
             </button>
           </td>
         </tr>
 
-        <!-- Mensaje cuando no hay datos -->
-        <tr v-if="razas.length === 0">
-          <td colspan="4" class="text-center text-muted">
-            No hay categorías registradas.
+        <tr v-if="!razas || razas.length === 0">
+          <td colspan="4" class="text-center text-muted py-4">
+            No hay razas registradas.
           </td>
         </tr>
       </tbody>
@@ -60,40 +57,38 @@
 import { ref, onMounted } from 'vue'
 import razasService from '../../../services/raza.service'
 
-// Estado reactivo
 const razas = ref([])
-const raza = ref({})
 
-// Cargar datos al montar el componente
-onMounted(() => {
-  getRazas()
+onMounted(async () => {
+  await getRazas()
 })
 
-// Función asíncrona para obtener los datos del backend
 async function getRazas() {
   try {
-    const { data } = await razasService.listar()
-    razas.value=data
+    const response = await razasService.listar()
+    razas.value = response.data || response
   } catch (error) {
-    console.error('Error al cargar categorías:', error)
-  }
-}
-async function crearRazas() {
-  try{
-    const { data } = await razasService.guardar(raza.value)
-    console.log(data)
-    getRazas()
-    raza.value= ""
-  }catch(error) {
-    console.error("Error al crear el registro")
+    console.error('Error al cargar las razas:', error)
+    alert('Error al cargar las razas')
   }
 }
 
-// Placeholder para botones
+async function eliminarRaza(id) {
+  if (!confirm('¿Estás seguro de eliminar esta raza?')) return
+
+  try {
+    await razasService.eliminar(id)
+    alert('Raza eliminada correctamente')
+    await getRazas()
+  } catch (error) {
+    console.error('Error al eliminar:', error)
+    alert('No se pudo eliminar la raza')
+  }
+}
 </script>
 
 <style scoped>
-table {
+.table {
   border-radius: 10px;
   overflow: hidden;
 }

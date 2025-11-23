@@ -2,7 +2,7 @@
 </script>
 <template>
     <div>
-        <h1>Prodctos</h1>
+        <h1>Productos</h1>
     </div>
 </template>
 <style>

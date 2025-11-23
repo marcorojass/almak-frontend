@@ -1,23 +1,19 @@
 import Api from "./api.service.js";
 
-
 export default {
-    listar(){
+    listar() {
         return Api().get("/v1/razas")
     },
-    mostrar(id){
+    obtenerPorId(id) {                 // ← CAMBIO AQUÍ (antes era "mostrar")
         return Api().get(`/v1/razas/${id}`)
     },
-    guardar(datos){
-        return Api().post("/v1/razas",datos)
-        
+    guardar(datos) {
+        return Api().post("/v1/razas", datos)
     },
-    modificar(id,datos){
-        return Api().put(`/v1/razas/${id}`,datos)
-        
+    actualizar(id, datos) {             // ← este nombre también cámbialo a "actualizar" para que coincida
+        return Api().put(`/v1/razas/${id}`, datos)
     },
-    eliminar(id){
+    eliminar(id) {
         return Api().delete(`/v1/razas/${id}`)
-        
     }
 }
