@@ -2,18 +2,19 @@ import Api from "./api.service.js";
 
 export default {
     listar() {
-        return Api().get("/v1/razas")
+        // Pedimos todas las razas
+        return Api().get("/v1/razas?size=1000&limit=1000");
     },
-    obtenerPorId(id) {                 // ← CAMBIO AQUÍ (antes era "mostrar")
-        return Api().get(`/v1/razas/${id}`)
+    mostrar(id) {
+        return Api().get(`/v1/razas/${id}`);
     },
     guardar(datos) {
-        return Api().post("/v1/razas", datos)
+        return Api().post("/v1/razas", datos);
     },
-    actualizar(id, datos) {             // ← este nombre también cámbialo a "actualizar" para que coincida
-        return Api().put(`/v1/razas/${id}`, datos)
+    modificar(id, datos) {
+        return Api().put(`/v1/razas/${id}`, datos);
     },
     eliminar(id) {
-        return Api().delete(`/v1/razas/${id}`)
+        return Api().delete(`/v1/razas/${id}`);
     }
 }

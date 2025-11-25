@@ -1,133 +1,122 @@
 <template>
   <div class="container mt-4">
-    <h2 class="mb-4 text-success">
-      {{ rutaEsEditar ? 'Editar Categoría' : 'Nueva Categoría' }}
-    </h2>
-
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <form @submit.prevent="guardarCategoria">
-          <div class="mb-3">
-            <label class="form-label">
-              Nombre de la Categoría <span class="text-danger">*</span>
-            </label>
-            <input
-              v-model="form.nombreCategoriaProducto"
-              type="text"
-              class="form-control"
-              placeholder="Ej: Alimentos, Juguetes, Medicamentos..."
-              required
-              :disabled="enviando"
-            />
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="card-header bg-success text-white py-3">
+            <h4 class="mb-0 fw-bold text-center">
+              <i class="bi bi-plus-circle-fill me-2"></i> Nueva Categoría
+            </h4>
           </div>
 
-          <div class="mb-4">
-            <label class="form-label">Descripción</label>
-            <textarea
-              v-model="form.descripcion"
-              class="form-control"
-              rows="4"
-              placeholder="Descripción opcional de la categoría..."
-              :disabled="enviando"
-            ></textarea>
-          </div>
+          <div class="card-body p-4 bg-light">
+            <form @submit.prevent="guardarCategoria">
+              
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Nombre de la Categoría</label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text bg-white border-end-0"><i class="bi bi-tag text-success"></i></span>
+                  <input 
+                    v-model="form.nombreCategoriaProducto" 
+                    type="text" 
+                    class="form-control border-start-0 ps-0" 
+                    placeholder="Ej: Alimentos Premium" 
+                    required 
+                    :disabled="loading"
+                  >
+                </div>
+              </div>
 
-          <div class="d-flex gap-3">
-            <button
-              type="submit"
-              class="btn btn-success d-flex align-items-center"
-              :disabled="enviando"
-            >
-              <span
-                v-if="enviando"
-                class="spinner-border spinner-border-sm me-2"
-              ></span>
-              {{ enviando 
-                ? (rutaEsEditar ? 'Actualizando...' : 'Creando...') 
-                : (rutaEsEditar ? 'Actualizar' : 'Crear') 
-              }} Categoría
-            </button>
+              <div class="mb-4">
+                <label class="form-label fw-bold text-secondary">Descripción</label>
+                <textarea 
+                  v-model="form.descripcion" 
+                  class="form-control shadow-sm" 
+                  rows="3" 
+                  placeholder="Detalles opcionales..."
+                  :disabled="loading"
+                ></textarea>
+              </div>
 
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                <button type="button" class="btn btn-secondary px-4" @click="volver">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-success px-4 fw-bold" :disabled="loading">
+                  <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                  {{ loading ? 'Guardando...' : 'Guardar Categoría' }}
+                </button>
+              </div>
+
+            </form>
           </div>
-        </form>
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import categoriaProductoService from '../../../services/categoriaProducto.service'
+import Swal from 'sweetalert2'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import servicio from '../../../services/categoriaProducto.service.js'
 
-const route = useRoute()
 const router = useRouter()
-
-const rutaEsEditar = route.path.includes('/editar/')
-const categoriaId = route.params.id
-
-const enviando = ref(false)
+const loading = ref(false)
 
 const form = ref({
   nombreCategoriaProducto: '',
   descripcion: ''
 })
 
-onMounted(async () => {
-  if (rutaEsEditar && categoriaId) {
-    await cargarCategoria()
-  }
-})
-
-async function cargarCategoria() {
-  try {
-    const response = await categoriaProductoService.obtenerPorId(categoriaId)
-    form.value = response.data || response
-  } catch (error) {
-    console.error('Error al cargar categoría:', error)
-    alert('No se pudo cargar la categoría para editar')
-  }
+function volver() {
+  router.push('/admin/categorias-productos')
 }
 
 async function guardarCategoria() {
   if (!form.value.nombreCategoriaProducto.trim()) {
-    alert('El nombre de la categoría es obligatorio')
+    Swal.fire('Atención', 'El nombre de la categoría es obligatorio.', 'warning')
     return
   }
 
-  enviando.value = true
-
+  loading.value = true
   try {
-    if (rutaEsEditar) {
-      await categoriaProductoService.actualizar(categoriaId, form.value)
-      alert('¡Categoría actualizada correctamente!')
-    } else {
-      await categoriaProductoService.guardar(form.value)
-      alert('¡Categoría creada correctamente!')
-      // Limpiar formulario para seguir creando
-      form.value = { nombreCategoriaProducto: '', descripcion: '' }
+    // Preparamos datos para el Backend (CamelCase)
+    const payload = {
+      nombreCategoriaProducto: form.value.nombreCategoriaProducto,
+      descripcion: form.value.descripcion,
+      activo: 1 // Por defecto activa
     }
 
-    // Vuelve a la página anterior (listado o donde haya venido)
-    if (router.options.history.state.back) {
-      router.back()
-    } else {
-      router.push('/admin/categorias-producto')
-    }
+    await servicio.guardar(payload)
+
+    // ALERTA SWEETALERT2
+    await Swal.fire({
+      icon: 'success',
+      title: '¡Registrado!',
+      text: 'La categoría se creó correctamente.',
+      timer: 2000,
+      showConfirmButton: false
+    })
+
+    volver()
   } catch (error) {
-    console.error('Error al guardar categoría:', error)
-    alert('Ocurrió un error al guardar la categoría')
+    console.error(error)
+    // Manejo de errores del backend
+    let msg = 'No se pudo guardar la categoría.'
+    if (error.response?.data?.message) msg = error.response.data.message
+    if (error.response?.data?.nombreCategoriaProducto) msg = error.response.data.nombreCategoriaProducto
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: msg
+    })
   } finally {
-    enviando.value = false
+    loading.value = false
   }
 }
 </script>
-
-<style scoped>
-.card {
-  max-width: 700px;
-  margin: 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-</style>

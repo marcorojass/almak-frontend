@@ -20,10 +20,15 @@
         </li>
         <li class="nav-item mb-3">
           <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/categorias-productos">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M225.86,102.82a16,16,0,0,0-12.5-5.77l-39.56-1.63-15.27-36.1A16,16,0,0,0,143.73,48h-31.46a16,16,0,0,0-14.8,11.32L82.2,95.42,42.64,97.05a16,16,0,0,0-12.5,5.77,16.13,16.13,0,0,0-3.49,13.9l12,36.44-27.64,24.93a16,16,0,0,0-4.69,15.26,15.85,15.85,0,0,0,10.92,10.92l35.54,9.52,9.52,35.54a16,16,0,0,0,15.26,4.69c5.16-.92,9.72-4.83,11.73-9.85l24.93-27.64,36.44,12a16.13,16.13,0,0,0,13.9-3.49,16,16,0,0,0,5.77-12.5l1.63-39.56,36.1-15.27a16.13,16.13,0,0,0,3.49-13.9A16,16,0,0,0,225.86,102.82Z"></path></svg>
-            Categorías
+            Categorías Productos
           </RouterLink>
         </li>
+        <li class="nav-item mb-3">
+          <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/categorias-servicios">
+            Categorías Servicios
+          </RouterLink>
+        </li>
+        
         <li class="nav-item mb-3">
           <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/productos">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,72v72.18L193.83,122A16,16,0,0,0,168,129.83L145.83,152,128,134.17,72.18,190H40V72Zm0,128H94.17L152,142.17,174.17,160,216,118.18Z"></path></svg>
@@ -31,8 +36,18 @@
           </RouterLink>
         </li>
         <li class="nav-item mb-3">
+          <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/usuarios/clientes">
+            <i class="bi bi-person-vcard-fill"></i>Clientes
+          </RouterLink>
+        </li>
+        <li class="nav-item mb-3">
+          <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/citas">
+            Citas
+          </RouterLink>
+        </li>
+        <li class="nav-item mb-3">
           <RouterLink class="nav-link d-flex align-items-center gap-3" to="/admin/mascotas">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M108,144a20,20,0,1,1-20-20A20,20,0,0,1,108,144Zm20-64a20,20,0,1,0-20-20A20,20,0,0,0,128,80Zm-8,72a20,20,0,1,0,20,20A20,20,0,0,0,120,152Zm88-92c-28.11,0-44.73,25.48-48.72,48.83A60.11,60.11,0,0,0,152,128c-32.48,0-48.38,23.31-52.41,44.71a44,44,0,1,0,56.82,0C159.9,156.94,176,136,208,136a44,44,0,0,0,0-88Zm0,64c-14.86,0-25.2,19.34-30.63,35.33C181.23,155.19,185,136,208,136A28,28,0,1,1,180,92c0-18.36,11.41-36,28-36s28,17.64,28,36S226.86,124,208,124Z"></path></svg>
+            <span class="material-symbols-outlined">pets</span>
             Mascotas
           </RouterLink>
         </li>
@@ -83,7 +98,11 @@
   width: 280px;
   position: fixed;
   height: 100vh;
-  background: linear-gradient(180deg, #0b3329 0%, #114539 100%);
+  background: #06192E;
+  background: #146B65;
+
+
+  
   box-shadow: 12px 0 40px rgba(0, 0, 0, 0.7);
   z-index: 1000;
   flex-shrink: 0; /* Importante: evita que se comprima */
@@ -104,7 +123,7 @@
 
 .nav-link:hover,
 .nav-link.router-link-active {
-  background: #1A6B56;
+  background: #f0564a;
   color: white;
   transform: translateX(10px);
   box-shadow: 0 10px 25px rgba(26, 107, 86, 0.6);
@@ -114,15 +133,14 @@
 .main-content {
   margin-left: 280px;           /* Exactamente el ancho del sidebar */
   min-height: 100vh;
-  background: #0d362d;
-  color: #A4BDC6;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
 }
 
 /* Header que llega hasta el borde derecho */
 .topbar {
-  background: #2d3f47;
+  background: #146B65;
   border-bottom: 6px solid #E47A73;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   width: 100%;
@@ -146,31 +164,13 @@
 }
 
 /* Contenido que se expande al 100% */
-.content {
-  background: #0d362d;
-  color: #A4BDC6;
-  width: 100%;
-  flex-grow: 1;
-}
 
-/* Forzar dark mode en todo el contenido hijo */
-.content ::v-deep(*) {
-  background: transparent !important;
-  color: #A4BDC6 !important;
-}
 
-.content ::v-deep(.card, .table, .modal-content, .form-control) {
-  background: rgba(17, 69, 57, 0.3) !important;
-  border: 1px solid rgba(164, 189, 198, 0.2) !important;
-  color: #A4BDC6 !important;
-}
 
-.content ::v-deep(h1, h2, h3, h4, h5, h6) {
-  color: #E47A73 !important;
-}
 
-.content ::v-deep(.btn-primary) {
-  background: #E47A73 !important;
-  border-color: #E47A73 !important;
-}
+
+
+
+
+
 </style>
