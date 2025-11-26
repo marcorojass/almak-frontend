@@ -1,116 +1,129 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import clienteService from '../../../services/cliente.service.js';
-import Swal from 'sweetalert2';
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import clienteService from "../../../services/cliente.service.js";
+import Swal from "sweetalert2";
 
-// Router
 const router = useRouter();
 const route = useRoute();
 
-// Campos del formulario
-let ciUsuario = ref('');
-let primerNombre = ref('');
-let segundoNombre = ref('');
-let primerApellido = ref('');
-let segundoApellido = ref('');
-let telefono = ref('');
-let direccion = ref('');
+// Variables del formulario
+const usuarioId = ref(null);
+const ciUsuario = ref("");
+const primerNombre = ref("");
+const segundoNombre = ref("");
+const primerApellido = ref("");
+const segundoApellido = ref("");
+const telefono = ref("");
+const direccion = ref("");
 
-// ID del cliente desde la URL
-const clienteId = route.params.id;
-
-// Cargar datos del cliente al montar
+// Cargar datos del cliente
 onMounted(async () => {
-    try {
-        const { data } = await clienteService.mostrar(clienteId);
-        ciUsuario.value = data.ciUsuario;
-        primerNombre.value = data.primerNombre;
-        segundoNombre.value = data.segundoNombre;
-        primerApellido.value = data.primerApellido;
-        segundoApellido.value = data.segundoApellido;
-        telefono.value = data.telefono;
-        direccion.value = data.direccion;
-    } catch (error) {
-        Swal.fire('Error', 'No se pudo cargar el cliente', 'error');
-    }
+  const id = route.params.id; // Recibimos el ID (ej: 1, 15)
+  usuarioId.value = id;
+
+  try {
+    const { data } = await clienteService.mostrar(id); 
+    
+    // Llenamos el formulario
+    ciUsuario.value = data.ciUsuario;
+    primerNombre.value = data.primerNombre;
+    segundoNombre.value = data.segundoNombre;
+    primerApellido.value = data.primerApellido;
+    segundoApellido.value = data.segundoApellido;
+    telefono.value = data.telefono;
+    direccion.value = data.direccion;
+    
+  } catch (error) {
+    console.error("Error al cargar cliente:", error);
+    Swal.fire("Error", "No se pudo cargar la información del cliente", "error");
+    router.push("/admin/usuarios/clientes");
+  }
 });
 
-// Función para guardar cambios
-async function editarCliente(e) {
-    e.preventDefault();
+// Guardar cambios
+async function actualizarCliente() {
+  const datos = {
+    usuarioId: usuarioId.value,
+    ciUsuario: ciUsuario.value,
+    primerNombre: primerNombre.value,
+    segundoNombre: segundoNombre.value,
+    primerApellido: primerApellido.value,
+    segundoApellido: segundoApellido.value,
+    telefono: telefono.value,
+    direccion: direccion.value
+  };
 
-    const datos = {
-        ciUsuario: ciUsuario.value,
-        primerNombre: primerNombre.value,
-        segundoNombre: segundoNombre.value,
-        primerApellido: primerApellido.value,
-        segundoApellido: segundoApellido.value,
-        telefono: telefono.value,
-        direccion: direccion.value
-    };
-
-    try {
-        await clienteService.modificar(clienteId, datos);
-        Swal.fire({
-            icon: 'success',
-            title: 'Cliente actualizado',
-            confirmButtonColor: '#f0564a'
-        }).then(() => {
-            router.push('/clientes'); // Redirige al listado
-        });
-    } catch (error) {
-        let mensaje = "Error al actualizar cliente.";
-        if (error.response && error.response.data) {
-            mensaje = Object.values(error.response.data).join('\n');
-        }
-        Swal.fire('Error', mensaje, 'error');
-    }
+  try {
+    // Usamos modificar como está en tu servicio
+    await clienteService.modificar(usuarioId.value, datos);
+    
+    Swal.fire({
+      icon: "success",
+      title: "Cliente actualizado",
+      showConfirmButton: false,
+      timer: 1500
+    }).then(() => {
+      router.push("/admin/usuarios/clientes");
+    });
+    
+  } catch (error) {
+    console.error(error);
+    Swal.fire("Error", "No se pudieron guardar los cambios", "error");
+  }
 }
 </script>
 
 <template>
-  <div class="d-flex justify-content-center align-items-start min-vh-100">
-    <form class="border p-4 rounded shadow" style="width: 600px;" @submit="editarCliente">
-      <h3 class="text-center mb-3">Editar Cliente</h3>
-
-      <div class="mb-3">
-        <label class="form-label">Documento de identidad (CI)</label>
-        <input type="text" class="form-control" v-model="ciUsuario" disabled/>
+  <div class="container mt-4" style="max-width: 800px;">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white border-bottom py-3">
+        <h4 class="text-success fw-bold mb-0">Editar Cliente</h4>
       </div>
+      <div class="card-body p-4">
+        <form @submit.prevent="actualizarCliente">
+          
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label fw-bold">Documento de Identidad (CI)</label>
+              <input type="text" class="form-control" v-model="ciUsuario" disabled />
+            </div>
 
-      <div class="mb-3">
-        <label class="form-label">Primer Nombre</label>
-        <input type="text" class="form-control" v-model="primerNombre"/>
+            <div class="col-md-6">
+              <label class="form-label">Primer Nombre</label>
+              <input type="text" class="form-control" v-model="primerNombre" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Segundo Nombre</label>
+              <input type="text" class="form-control" v-model="segundoNombre" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Primer Apellido</label>
+              <input type="text" class="form-control" v-model="primerApellido" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Segundo Apellido</label>
+              <input type="text" class="form-control" v-model="segundoApellido" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input type="text" class="form-control" v-model="telefono" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-control" v-model="direccion" required />
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4 justify-content-end">
+             <router-link class="btn btn-secondary" to="/admin/usuarios/clientes">Cancelar</router-link>
+             <button type="submit" class="btn btn-salmon text-white">Guardar Cambios</button>
+          </div>
+        </form>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">Segundo Nombre</label>
-        <input type="text" class="form-control" v-model="segundoNombre"/>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Primer Apellido</label>
-        <input type="text" class="form-control" v-model="primerApellido"/>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Segundo Apellido</label>
-        <input type="text" class="form-control" v-model="segundoApellido"/>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Teléfono</label>
-        <input type="number" class="form-control" v-model="telefono"/>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Dirección</label>
-        <input type="text" class="form-control" v-model="direccion"/>
-      </div>
-
-      <button type="submit" class="btn btn-salmon w-100">Guardar cambios</button>
-    </form>
+    </div>
   </div>
 </template>
 
@@ -118,18 +131,10 @@ async function editarCliente(e) {
 .btn-salmon {
   background-color: #f0564a;
   border: 1px solid #f0564a;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.15s ease-in-out;
+  transition: all 0.2s;
 }
 .btn-salmon:hover {
-  background-color: #d84c42;
-  border-color: #d84c42;
-}
-.btn-salmon:active {
-  background-color: #c0433a;
-  border-color: #c0433a;
+  background-color: #d64539;
+  border-color: #d64539;
 }
 </style>

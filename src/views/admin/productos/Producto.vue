@@ -17,7 +17,6 @@ let page = ref(0);
 let size = ref(10);
 let totalPages = ref(0);
 
-// Cargar categorías al iniciar
 const cargarCategorias = async () => {
   try {
     const resp = await categoriaProductoService.listar();
@@ -37,12 +36,12 @@ const cargarProductos = async () => {
       stockIgual: stockIgual.value || undefined,
       page: page.value,
       size: size.value,
-      sort: "productoId,desc" // <--- orden descendente
+      sort: "productoId,desc" 
     });
 
     productos.value = resp.data.content
-  .slice() // crea copia para no mutar el original
-  .sort((a, b) => b.productoId - a.productoId); // descendente
+  .slice() 
+  .sort((a, b) => b.productoId - a.productoId); 
 totalPages.value = resp.data.totalPages;
 
 
@@ -51,19 +50,16 @@ totalPages.value = resp.data.totalPages;
   }
 };
 
-
-
-// Aplicar filtros
 const aplicarFiltros = () => {
   page.value = 0;
   cargarProductos();
 };
 
-// Cambiar página
 const cambiarPagina = (nueva) => {
   page.value = nueva;
   cargarProductos();
 };
+
 async function eliminarProducto(id) {
   const resultado = await Swal.fire({
     title: '¿Estás seguro?',
@@ -85,7 +81,7 @@ async function eliminarProducto(id) {
         text: 'El producto ha sido eliminado.',
         confirmButtonColor: '#146b65'
       });
-      cargarProductos(); // refresca la tabla
+      cargarProductos(); 
     } catch (error) {
       console.error("Error eliminando producto:", error);
       Swal.fire({
@@ -98,7 +94,6 @@ async function eliminarProducto(id) {
   }
 }
 
-
 onMounted(async () => {
   await cargarCategorias();
   await cargarProductos();
@@ -106,135 +101,106 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container-fluid">
-    <h1>Productos</h1>
-
-    <div class="row mb-3">
-      <div class="col-md-3 mb-2">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Nombre del producto"
-          v-model="nombre"
-          @input="aplicarFiltros"
-        />
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="text-success fw-bold mb-0">Gestión de Productos</h2>
+        <p class="text-muted mb-0">Inventario general</p>
       </div>
+      <router-link class="btn btn-green shadow-sm" to="/admin/productos/crear">
+        <i class="bi bi-plus-lg"></i> Nuevo Producto
+      </router-link>
+    </div>
 
-      <div class="col-md-3 mb-2">
-        <select
-          class="form-select"
-          v-model="categoriaId"
-          @change="aplicarFiltros"
-        >
-          <option value="">-- Todas las categorías --</option>
-          <option
-            v-for="cat in categorias"
-            :key="cat.categoriaProductoId"
-            :value="cat.categoriaProductoId"
-          >
+    <div class="row g-2 mb-4">
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Nombre" v-model="nombre" @input="aplicarFiltros" />
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" v-model="categoriaId" @change="aplicarFiltros">
+          <option value="">-- Categoría --</option>
+          <option v-for="cat in categorias" :key="cat.categoriaProductoId" :value="cat.categoriaProductoId">
             {{ cat.nombreCategoriaProducto }}
           </option>
         </select>
       </div>
-
-      <div class="col-md-2 mb-2">
-        <input
-          type="number"
-          class="form-control"
-          placeholder="Stock mayor a"
-          v-model.number="stockMayor"
-          @input="aplicarFiltros"
-        />
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Stock >" v-model.number="stockMayor" @input="aplicarFiltros" />
       </div>
-
-      <div class="col-md-2 mb-2">
-        <input
-          type="number"
-          class="form-control"
-          placeholder="Stock menor a"
-          v-model.number="stockMenor"
-          @input="aplicarFiltros"
-        />
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Stock <" v-model.number="stockMenor" @input="aplicarFiltros" />
       </div>
-
-      <div class="col-md-2 mb-2">
-        <input
-          type="number"
-          class="form-control"
-          placeholder="Stock igual a"
-          v-model.number="stockIgual"
-          @input="aplicarFiltros"
-        />
+      <div class="col-md-2">
+        <input type="number" class="form-control" placeholder="Stock =" v-model.number="stockIgual" @input="aplicarFiltros" />
       </div>
     </div>
 
-    <router-link class="btn btn-green mb-3" to="/admin/productos/crear">
-      Crear nuevo <i class="bi bi-plus-square-fill"></i>
-    </router-link>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Categoría</th>
-          <th>Stock</th>
-          <th>Precio Costo</th>
-          <th>Precio Venta</th>
-          <th>Descripción</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="p in productos" :key="p.productoId">
-          <td>{{ p.nombreProducto }}</td>
-          <td>{{ p.categoriaProducto.nombreCategoriaProducto }}</td>
-          <td>{{ p.stock }}</td>
-          <td>{{ p.precioCosto.toFixed(2) }}</td>
-          <td>{{ p.precioVenta.toFixed(2) }}</td>
-          <td>{{ p.descripcion }}</td>
-          <td>
-            <div class="d-flex gap-2">
-  <router-link
-    :to="`/admin/productos/editar/${p.productoId}`"
-    class="btn btn-warning btn-sm d-flex align-items-center justify-content-center"
-  >
-    <i class="bi bi-pen-fill me-1"></i>
-  </router-link>
+    <div class="card shadow-sm border-0 overflow-hidden">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-success text-white">
+              <tr>
+                <th class="py-3 ps-4">Nombre</th>
+                <th class="py-3">Categoría</th>
+                <th class="py-3 text-center">Stock</th>
+                <th class="py-3 text-end">Costo</th>
+                <th class="py-3 text-end">Venta</th>
+                <th class="py-3">Descripción</th>
+                <th class="py-3 text-center" style="width: 150px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in productos" :key="p.productoId">
+                <td class="ps-4 fw-bold">{{ p.nombreProducto }}</td>
+                <td>{{ p.categoriaProducto.nombreCategoriaProducto }}</td>
+                <td class="text-center">
+                    <span class="badge bg-secondary rounded-pill">{{ p.stock }}</span>
+                </td>
+                <td class="text-end">{{ p.precioCosto.toFixed(2) }}</td>
+                <td class="text-end fw-bold text-success">{{ p.precioVenta.toFixed(2) }}</td>
+                <td class="text-muted text-truncate" style="max-width: 200px;">{{ p.descripcion }}</td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <router-link
+                      :to="`/admin/productos/editar/${p.productoId}`"
+                      class="btn btn-warning btn-sm text-white"
+                      title="Editar"
+                    >
+                      <i class="bi bi-pen-fill"></i>
+                    </router-link>
+                    <button class="btn btn-danger btn-sm" @click="eliminarProducto(p.productoId)" title="Eliminar">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="productos.length === 0">
+                 <td colspan="7" class="text-center py-5 text-muted">
+                   <i class="bi bi-box-seam fs-1 d-block mb-2 opacity-50"></i>
+                   No se encontraron productos.
+                 </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-  <button
-    class="btn btn-danger btn-sm d-flex align-items-center justify-content-center"
-    @click="eliminarProducto(p.productoId)"
-  >
-    <i class="bi bi-trash-fill me-1"></i> 
-  </button>
-</div>
-
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <nav>
-      <ul class="pagination">
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
         <li :class="['page-item', { disabled: page === 0 }]">
-          <button class="page-link" @click="cambiarPagina(page - 1)">
-            Anterior
-          </button>
+          <button class="page-link" @click="cambiarPagina(page - 1)">Anterior</button>
         </li>
-
         <li
           v-for="n in totalPages"
           :key="n"
           :class="['page-item', { active: n - 1 === page }]"
         >
-          <button class="page-link" @click="cambiarPagina(n - 1)">
-            {{ n }}
-          </button>
+          <button class="page-link" @click="cambiarPagina(n - 1)">{{ n }}</button>
         </li>
-
         <li :class="['page-item', { disabled: page === totalPages - 1 }]">
-          <button class="page-link" @click="cambiarPagina(page + 1)">
-            Siguiente
-          </button>
+          <button class="page-link" @click="cambiarPagina(page + 1)">Siguiente</button>
         </li>
       </ul>
     </nav>
@@ -242,7 +208,12 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* opcional: estilos bootstrap ya cubren la mayoría */
+.table-success {
+  --bs-table-bg: #1a6b56;
+  --bs-table-color: #fff;
+  border-color: #145242;
+}
+
 .btn-green {
   background-color: #146b65;
   border: 1px solid #146b65;
@@ -256,12 +227,6 @@ onMounted(async () => {
 .btn-green:hover {
   background-color: #0f534f;
   border-color: #0f534f;
-  color: #fff;
-}
-
-.btn-green:active {
-  background-color: #0b3d3a;
-  border-color: #0b3d3a;
   color: #fff;
 }
 </style>
